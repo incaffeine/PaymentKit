@@ -418,26 +418,21 @@ static NSString *const kPKOldLocalizedStringsTableName = @"STPaymentLocalizable"
 {
     if (textField == self.cardCVCField)
         [self.cardExpiryField becomeFirstResponder];
-    else if (textField == self.cardExpiryField)
+    else if (textField == self.cardExpiryField) {
+        NSString* resultString = [PKTextField textByRemovingUselessSpacesFromString:self.cardNumberField.text];
+        PKCardNumber *cardNumber = [PKCardNumber cardNumberWithString:resultString];
+        
+        if (cardNumber.isValidLength) {
+            self.cardNumberField.text = [self.cardNumberField.text substringToIndex:self.cardNumberField.text.length - 1];
+        }
+        
         [self stateCardNumber];
-}
-
-- (BOOL)checkForAddingCharactersAfterFullCardNumber:(NSString*)cardNumberText range:(NSRange)range {
-    
-    NSString* resultString = [PKTextField textByRemovingUselessSpacesFromString:cardNumberText];
-    PKCardNumber *cardNumber = [PKCardNumber cardNumberWithString:resultString];
-    
-    return !range.length && range.location == cardNumberText.length && cardNumber.isValidLength;
+    }
 }
 
 - (BOOL)cardNumberFieldShouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)replacementString
 {
-    NSString *resultString;
-    
-    if ([self checkForAddingCharactersAfterFullCardNumber:self.cardNumberField.text range:range])
-        resultString = self.cardNumberField.text;
-    else
-        resultString = [self.cardNumberField.text stringByReplacingCharactersInRange:range withString:replacementString];
+    NSString *resultString = [self.cardNumberField.text stringByReplacingCharactersInRange:range withString:replacementString];
     resultString = [PKTextField textByRemovingUselessSpacesFromString:resultString];
     PKCardNumber *cardNumber = [PKCardNumber cardNumberWithString:resultString];
 
