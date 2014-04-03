@@ -422,9 +422,22 @@ static NSString *const kPKOldLocalizedStringsTableName = @"STPaymentLocalizable"
         [self stateCardNumber];
 }
 
+- (BOOL)checkForAddingCharactersAfterFullCardNumber:(NSString*)cardNumberText range:(NSRange)range {
+    
+    NSString* resultString = [PKTextField textByRemovingUselessSpacesFromString:cardNumberText];
+    PKCardNumber *cardNumber = [PKCardNumber cardNumberWithString:resultString];
+    
+    return !range.length && range.location == cardNumberText.length && cardNumber.isValidLength;
+}
+
 - (BOOL)cardNumberFieldShouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)replacementString
 {
-    NSString *resultString = [self.cardNumberField.text stringByReplacingCharactersInRange:range withString:replacementString];
+    NSString *resultString;
+    
+    if ([self checkForAddingCharactersAfterFullCardNumber:self.cardNumberField.text range:range])
+        resultString = self.cardNumberField.text;
+    else
+        resultString = [self.cardNumberField.text stringByReplacingCharactersInRange:range withString:replacementString];
     resultString = [PKTextField textByRemovingUselessSpacesFromString:resultString];
     PKCardNumber *cardNumber = [PKCardNumber cardNumberWithString:resultString];
 
